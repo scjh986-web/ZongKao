@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>陕西商洛中考查报</title>
+    <style>
+        :root {
+            /* 🍏 保持优雅微渐变背景 */
+            --bg-gradient: linear-gradient(135deg, #eef2f7 0%, #e3e9f1 40%, #ebdff0 75%, #f7f1eb 100%);
+            
+            /* 🍏 加强透亮感的磨砂玻璃基底 */
+            --glass-bg: rgba(255, 255, 255, 0.12); 
+            --glass-blur: blur(35px) saturate(230%); 
+            
+            /* 🍏 让框框无比分明的高光粗白边框 */
+            --glass-border-distinct: 1.5px solid rgba(255, 255, 255, 0.75);
+            
+            --text-title: #1d1d1f;
+            --text-body: #2c2c2e;
+            --text-caption: #6e6e73;
+            
+            --btn-gradient: linear-gradient(135deg, #0071e3 0%, #00b4d8 100%);
+            --btn-success: linear-gradient(135deg, #34c759 0%, #4cd964 100%);
+            
+            --radius-main: 24px;
+            
+            /* iOS 系统级弹性阻尼缓动曲线 */
+            --apple-ease: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-body);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 28px 18px;
+            padding-bottom: calc(28px + env(safe-area-inset-bottom));
+            min-height: 100vh;
+        }
+
+        /* 当弹窗出现时，控制整个页面不可滑动 */
+        body.modal-open {
+            overflow: hidden !important;
+            height: 100vh !important;
+        }
+
+        /* 🍏 网页核心包裹层：增加过渡动画，允许加深模糊 */
+        .wrapper {
+            width: 100%;
+            max-width: 400px;
+            transition: filter 0.4s var(--apple-ease), transform 0.4s var(--apple-ease);
+            will-change: filter, transform;
+        }
+
+        /* 🍏 当弹窗激活动态附加此样式，使底层背景变模糊、微缩，呈现第二层背景沉浸感 */
+        body.modal-open .wrapper {
+            filter: blur(8px);
+            transform: scale(0.97);
+        }
+
+        header {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 28px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-title);
+        }
+
+        header p {
+            color: var(--text-caption);
+            font-size: 9px;
+            letter-spacing: 3px;
+            margin-top: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* 倒计时外舱 */
+        .countdown-container {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-main);
+            padding: 22px 18px;
+            margin-bottom: 20px;
+            border: var(--glass-border-distinct);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255,255,255,0.3);
+            transition: border-color 0.4s var(--apple-ease), background 0.4s var(--apple-ease);
+        }
+
+        .countdown-container.urgent-mode {
+            border-color: rgba(255, 59, 48, 0.5);
+            background: rgba(255, 59, 48, 0.04);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-title);
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.3s var(--apple-ease);
+            max-width: 100%;
+        }
+        
+        .status-badge.urgent-badge {
+            background: rgba(255, 59, 48, 0.15);
+            border-color: rgba(255, 59, 48, 0.35);
+            color: #d01b1b;
+        }
+
+        .status-badge span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            background: #ff9500;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 8px #ff9500;
+            flex-shrink: 0;
+            transition: all 0.3s var(--apple-ease);
+        }
+
+        /* 时间流逝进度条 */
+        .progress-track {
+            width: 85%;
+            height: 5px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            margin: 0 auto 16px auto;
+            overflow: hidden;
+            border: 0.5px solid rgba(255,255,255,0.5);
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--btn-gradient);
+            border-radius: 10px;
+            transition: width 0.4s var(--apple-ease), background 0.4s var(--apple-ease);
+        }
+
+        .timer-grid {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .timer-cell {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            padding: 10px 0;
+            border-radius: 16px;
+            flex: 1;
+            max-width: 70px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-align: center;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        .cell-num {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-title);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .cell-label {
+            font-size: 10px;
+            color: var(--text-caption);
+            margin-top: 1px;
+            font-weight: 500;
+        }
+
+        .stack-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 核心业务板块框框 */
+        .premium-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-main);
+            padding: 26px 22px;
+            border: var(--glass-border-distinct);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255,255,255,0.2);
+        }
+
+        .card-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-title);
+            letter-spacing: -0.3px;
+        }
+
+        .card-header .meta-tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.4);
+            color: var(--text-title);
+            margin-top: 6px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        /* 避堵框框 */
+        .info-glass-bar {
+            background: rgba(255, 149, 0, 0.05);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 16px;
+            padding: 14px;
+            margin: 18px 0;
+            font-size: 12px;
+            color: #4a2d00;
+            line-height: 1.6;
+            border: 1.5px solid rgba(255, 149, 0, 0.35);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .info-glass-bar b {
+            color: #a05000;
+        }
+
+        /* 纯净高级大按钮 */
+        .action-button {
+            display: block;
+            width: 100%;
+            height: 50px;
+            line-height: 50px;
+            background: var(--btn-gradient);
+            color: #ffffff;
+            border-radius: 25px;
+            font-size: clamp(12px, 3.8vw, 15px); 
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: 0.5px;
+            text-decoration: none !important;
+            box-shadow: 0 8px 24px rgba(0, 113, 227, 0.15);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            will-change: transform, opacity;
+            transition: transform 0.2s var(--apple-ease), opacity 0.2s var(--apple-ease), background 0.3s var(--apple-ease);
+        }
+
+        .action-button:active {
+            transform: scale(0.95);
+            opacity: 0.85;
+        }
+
+        .action-button.success-active {
+            background: var(--btn-success) !important;
+            box-shadow: 0 8px 24px rgba(52, 199, 89, 0.15) !important;
+        }
+
+        /* 日程子框框 */
+        .list-box {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 10px 12px;
+            margin-top: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .list-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 2px;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+            color: var(--text-body);
+            white-space: nowrap; 
+            overflow: hidden;
+        }
+        .list-row:last-child { border-bottom: none; }
+        .list-row.active { color: #a05000; font-weight: 600; }
+        .list-row.disabled { opacity: 0.2; text-decoration: line-through; }
+        
+        .row-key { 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            padding-right: 8px; 
+            min-width: 0;
+            flex: 1;
+        }
+        .row-val { 
+            font-size: 11px; 
+            color: var(--text-caption); 
+            font-variant-numeric: tabular-nums; 
+            flex-shrink: 0; 
+        }
+        .active .row-val { color: #a05000; }
+
+        /* 高级原生态玻璃流顶部俯冲式横幅组件 */
+        .glass-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.25); /* 稍微加深遮罩背景 */
+            display: flex; 
+            align-items: flex-start; 
+            justify-content: center;
+            z-index: 1000; 
+            padding: 16px; 
+            opacity: 0; 
+            pointer-events: none; 
+            will-change: opacity;
+            transition: opacity 0.4s var(--apple-ease);
+            overflow-y: auto; /* 仅允许弹窗内部由于小屏幕而产生的局部滑动 */
+        }
+        .glass-modal.is-visible { opacity: 1; pointer-events: auto; }
+        
+        .modal-body {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(25px) saturate(210%);
+            -webkit-backdrop-filter: blur(25px) saturate(210%);
+            padding: 22px 20px; 
+            border-radius: 24px; 
+            width: 100%; 
+            max-width: 380px;
+            border: 1.5px solid rgba(255, 255, 255, 0.65); 
+            text-align: center; 
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255,255,255,0.4);
+            transform: translate3d(0, -100px, 0) scale3d(0.95, 0.95, 1); 
+            will-change: transform; 
+            transition: transform 0.45s var(--apple-ease);
+            margin-top: calc(10px + env(safe-area-inset-top)); 
+        }
+        .glass-modal.is-visible .modal-body { transform: translate3d(0, 0, 0) scale3d(1, 1, 1); }
+        .modal-body h3 { font-size: 17px; font-weight: 700; color: var(--text-title); }
+        
+        .toast-info-card {
+            background: rgba(255, 59, 48, 0.04); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 59, 48, 0.25); padding: 12px; border-radius: 14px; text-align: left; margin-top: 12px; font-size: 12px; line-height: 1.6; color: #c91818;
+        }
+        .modal-body img { width: 100%; border-radius: 14px; margin: 14px 0 16px 0; border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .modal-action-group { display: flex; gap: 10px; width: 100%; }
+        .btn-modal-primary { height: 44px; line-height: 44px; font-size: 13px; flex: 1.2; }
+        .btn-modal-close { height: 44px; line-height: 44px; background: var(--text-title); color: #ffffff; box-shadow: none; font-size: 13px; flex: 1; }
+
+        /* 极轻量高弹成功提示小气泡 */
+        .toast-popup {
+            position: fixed; bottom: 44px; background: rgba(29, 29, 31, 0.88); color: #ffffff; padding: 11px 24px;
+            border-radius: 22px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s var(--apple-ease), transform 0.3s var(--apple-ease); z-index: 2000; 
+            backdrop-filter: blur(15px); border: 0.5px solid rgba(255,255,255,0.2);
+            transform: translate3d(0, 10px, 0);
+        }
+        .toast-popup.show { opacity: 1; transform: translate3d(0, 0, 0); }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <header>
+            <h1> 陕西商洛中考查报</h1>
+            <p>2026 Pro Motion Standard</p>
+        </header>
+
+        <div class="countdown-container" id="countdown-box">
+            <center>
+                <div class="status-badge" id="badge-box">
+                    <div class="status-dot" id="live-dot"></div>
+                    <span id="live-badge">链接载入中...</span>
+                </div>
+            </center>
+            
+            <div class="progress-track"><div class="progress-bar" id="p-bar"></div></div>
+
+            <div class="timer-grid">
+                <div class="timer-cell"><div class="cell-num" id="days">00</div><div class="cell-label">天</div></div>
+                <div class="timer-cell"><div class="cell-num" id="hours">00</div><div class="cell-label">时</div></div>
+                <div class="timer-cell"><div class="cell-num" id="mins">00</div><div class="cell-label">分</div></div>
+                <div class="timer-cell"><div class="cell-num" id="secs">00</div><div class="cell-label">秒</div></div>
+            </div>
+        </div>
+
+        <div class="stack-layout">
+            
+            <div class="premium-card">
+                <div class="card-header">
+                    <h2>中考成绩查询入口</h2>
+                    <div class="meta-tag">官方原链通道</div>
+                </div>
+                
+                <div class="info-glass-bar">
+                    💡 <b>重要避堵提示：</b>12点 是查分最高峰，中考查询链接和界面因查询人数太多极易产生网络拥堵。官方通道目前设定于 <b>11:56</b>（提前 4 分钟）解禁开启，届时均可提前点击进入。
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button class="action-button" id="query-btn" onclick="handleQueryClick()" style="flex: 1.4;">进入系统 (提前查看)</button>
+                    <button class="action-button" onclick="copyUrl(0)" style="flex: 1; background: transparent; border: 1px solid rgba(0, 113, 227, 0.4); color: #0071e3; box-shadow: none;">复制查询网址</button>
+                </div>
+            </div>
+
+            <div class="premium-card">
+                <div class="card-header">
+                    <h2>志愿填报入口(电脑端操作)</h2>
+                    <div class="meta-tag">周期：07/20 至 07/22</div>
+                </div>
+                <div style="height: 14px;"></div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <a href="https://gz.slkszs.cn:9999/index.htm" class="action-button" target="_blank" style="flex: 1.4; background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.5); color: var(--text-title); box-shadow: none;">进入志愿填报</a>
+                    <button class="action-button" onclick="copyUrl(1)" style="flex: 1; background: transparent; border: 1px solid rgba(0, 113, 227, 0.4); color: #0071e3; box-shadow: none;">复制填报网址</button>
+                </div>
+            </div>
+
+            <div class="premium-card">
+                <div class="card-header">
+                    <h2>招录重要日程表</h2>
+                </div>
+                <div class="list-box">
+                    <div class="list-row" id="node-0"><span class="row-key">成绩查询与界面开启 (11:56)</span><span class="row-val">07-15 12:00</span></div>
+                    <div class="list-row" id="node-1"><span class="row-key">1. 考生填报志愿</span><span class="row-val">07/20 - 07/22</span></div>
+                    <div class="list-row" id="node-2"><span class="row-key">2. 政策优抚、特长生、定向生录取</span><span class="row-val">07/23 - 07/23</span></div>
+                    <div class="list-row" id="node-3"><span class="row-key">3. 统招生录取</span><span class="row-val">07/24 - 07/24</span></div>
+                    <div class="list-row" id="node-4"><span class="row-key">4. 考生填报征集志愿</span><span class="row-val">07/26 - 07/26</span></div>
+                    <div class="list-row" id="node-5"><span class="row-key">5. 统招生征集志愿录取</span><span class="row-val">07/27 - 07/27</span></div>
+                    <div class="list-row" id="node-6"><span class="row-key">6. 综合高中班志愿填报</span><span class="row-val">07/31 - 08/02</span></div>
+                    <div class="list-row" id="node-7"><span class="row-key">7. 中等职业学校志愿填报</span><span class="row-val">08/06 - 08/08</span></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="glass-modal" id="guide-modal" onclick="closeModal()">
+        <div class="modal-body" onclick="event.stopPropagation()">
+            <h3 id="modal-title">⏳ 查询通道尚未开启</h3>
+            <div class="toast-info-card" id="modal-alert-box">
+                ⚠️ <b>避堵提示：</b>12:00 属于中考查询高峰，人数太多极易发生白屏。查询链接及界面将于 <b>11:56</b> 提前解禁开放，请参考下方图示提前做好准备。
+            </div>
+            <img id="modal-img" src="" alt="位置图指引" onerror="this.src='https://via.placeholder.com/350x200/edf3fc/0071e3?text=%e5%9b%be%e7%89%87%e5%8a%a0%e8%bd%bd%e4%b8%ad'">
+            <div class="modal-action-group">
+                <button class="action-button btn-modal-primary" onclick="redirectToTarget()">提前进入</button>
+                <button class="action-button btn-modal-close" onclick="closeModal()">知晓提示</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-popup" id="toast-tip">📋 网址已成功复制</div>
+
+    <script>
+        const targetLink = "https://zk.slkszs.cn:8888/";
+        const targetTime = new Date("2026/07/15 11:56:00").getTime();
+        let isOpened = false;
+
+        const DEBUG_TIME_HAS_PASSED = false;
+
+        const timelineData = [
+            { name: "中考查询及界面提前开启倒计时", time: targetTime, duration: 15 * 24 * 60 * 60 * 1000 }, 
+            { name: "距离 考生填报志愿 截止还剩", newDate: "2026/07/22 23:59:59", duration: 3 * 24 * 60 * 60 * 1000 },
+            { name: "距离 政策优抚/特长/定向生录取 结束还剩", newDate: "2026/07/23 23:59:59", duration: 24 * 60 * 60 * 1000 },
+            { name: "距离 统招生录取 结束还剩", newDate: "2026/07/24 23:59:59", duration: 24 * 60 * 60 * 1000 },
+            { name: "距离 考生填报征集志愿 结束还剩", newDate: "2026/07/26 23:59:59", duration: 24 * 60 * 60 * 1000 },
+            { name: "距离 统招生征集志愿录取 结束还剩", newDate: "2026/07/27 23:59:59", duration: 24 * 60 * 60 * 1000 },
+            { name: "距离 综合高中班志愿填报 截止还剩", newDate: "2026/08/02 23:59:59", duration: 3 * 24 * 60 * 60 * 1000 },
+            { name: "距离 中等职业学校志愿填报 截止还剩", newDate: "2026/08/08 23:59:59", duration: 3 * 24 * 60 * 60 * 1000 }
+        ].map(item => item.time ? item : { ...item, time: new Date(item.newDate).getTime() });
+
+        function redirectToTarget() { window.open(targetLink, "_blank"); }
+        function handleQueryClick() {
+            if (isOpened) { redirectToTarget(); } 
+            else { showModal("⏳ 查询通道尚未开启", "https://s41.ax1x.com/2026/06/27/pmUa9KS.jpg", true); }
+        }
+
+        // 🍏 打开弹窗：增加锁定滑动和底层高斯模糊类名
+        function showModal(title, imgSrc, showWarning) {
+            document.getElementById("modal-title").innerText = title;
+            document.getElementById("modal-img").src = imgSrc;
+            document.getElementById("modal-alert-box").style.display = showWarning ? "block" : "none";
+            
+            document.getElementById("guide-modal").classList.add("is-visible");
+            document.body.classList.add("modal-open"); // 锁定底部滚动并触发模糊
+        }
+        
+        // 🍏 关闭弹窗：解除锁定和高斯模糊
+        function closeModal() { 
+            document.getElementById("guide-modal").classList.remove("is-visible"); 
+            document.body.classList.remove("modal-open"); // 恢复滚动
+        }
+
+        function copyUrl(type) {
+            const url = (type === 0) ? "https://zk.slkszs.cn:8888/" : "https://gz.slkszs.cn:9999/index.htm";
+            const toast = document.getElementById("toast-tip");
+            
+            const triggerSuccessNotice = () => {
+                toast.innerText = (type === 0) ? "📋 查询原链已成功复制" : "📋 填报网址已成功复制";
+                toast.classList.add("show");
+                setTimeout(() => toast.classList.remove("show"), 1800);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(triggerSuccessNotice).catch(() => fallbackCopyEngine(url, triggerSuccessNotice));
+            } else {
+                fallbackCopyEngine(url, triggerSuccessNotice);
+            }
+        }
+
+        function fallbackCopyEngine(text, callback) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.top = "0"; textArea.style.left = "0";
+            textArea.style.width = "2em"; textArea.style.height = "2em";
+            textArea.style.border = "none"; textArea.style.outline = "none";
+            textArea.style.background = "transparent";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            textArea.setSelectionRange(0, 99999);
+            try {
+                if (document.execCommand('copy')) callback();
+            } catch (err) {}
+            document.body.removeChild(textArea);
+        }
+
+        function handleMobileLogic() {
+            const now = DEBUG_TIME_HAS_PASSED ? new Date("2026/07/16 12:00:00").getTime() : new Date().getTime();
+            let activeIndex = -1;
+
+            for (let i = 0; i < timelineData.length; i++) {
+                if (now < timelineData[i].time) { activeIndex = i; break; }
+            }
+
+            for (let i = 0; i < timelineData.length; i++) {
+                const item = document.getElementById(`node-${i}`);
+                if (i < activeIndex || activeIndex === -1) { item.className = "list-row disabled"; } 
+                else if (i === activeIndex) { item.className = "list-row active"; } 
+                else { item.className = "list-row"; }
+            }
+
+            const queryBtn = document.getElementById("query-btn");
+            const liveDot = document.getElementById("live-dot");
+            const countdownBox = document.getElementById("countdown-box");
+            const badgeBox = document.getElementById("badge-box");
+            const progressBar = document.getElementById("p-bar");
+            
+            if (now >= targetTime) {
+                isOpened = true;
+                queryBtn.innerText = "进入系统 (查看成绩)";
+                queryBtn.classList.add("success-active");
+                liveDot.style.background = "#34c759";
+                liveDot.style.boxShadow = "0 0 10px #34c759";
+            } else {
+                isOpened = false;
+                queryBtn.innerText = "进入系统 (提前查看)";
+                queryBtn.classList.remove("success-active");
+                liveDot.style.background = "#ff9500";
+                liveDot.style.boxShadow = "0 0 10px #ff9500";
+            }
+
+            const badge = document.getElementById("live-badge");
+            if (activeIndex === -1) {
+                badge.innerText = "本届中考招录基本结束";
+                progressBar.style.width = "100%";
+                document.getElementById("days").innerText = "00";
+                document.getElementById("hours").innerText = "00";
+                document.getElementById("mins").innerText = "00";
+                document.getElementById("secs").innerText = "00";
+                clearInterval(intervalId);
+                return;
+            }
+
+            badge.innerText = timelineData[activeIndex].name;
+            const diff = timelineData[activeIndex].time - now;
+
+            if (diff < 2 * 60 * 60 * 1000) { 
+                countdownBox.classList.add("urgent-mode");
+                badgeBox.classList.add("urgent-badge");
+                liveDot.style.background = "#ff3b30";
+                liveDot.style.boxShadow = "0 0 10px #ff3b30";
+                if(activeIndex > 0) badge.innerText = "⚠️ 招录即将截止，请抓紧操作！";
+            } else {
+                countdownBox.classList.remove("urgent-mode");
+                badgeBox.classList.remove("urgent-badge");
+            }
+
+            const percent = Math.max(0, Math.min(100, ((timelineData[activeIndex].duration - diff) / timelineData[activeIndex].duration) * 100));
+            progressBar.style.width = percent + "%";
+            
+            if (diff < 2 * 60 * 60 * 1000) { 
+                progressBar.style.background = "linear-gradient(135deg, #ff3b30 0%, #ff9500 100%)"; 
+            } else { 
+                progressBar.style.background = "var(--btn-gradient)"; 
+            }
+            
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = d < 10 ? "0" + d : d;
+            document.getElementById("hours").innerText = h < 10 ? "0" + h : h;
+            document.getElementById("mins").innerText = m < 10 ? "0" + m : m;
+            document.getElementById("secs").innerText = s < 10 ? "0" + s : s;
+        }
+
+        const intervalId = setInterval(handleMobileLogic, 1000);
+        handleMobileLogic();
+    </script>
+</body>
+</html>
